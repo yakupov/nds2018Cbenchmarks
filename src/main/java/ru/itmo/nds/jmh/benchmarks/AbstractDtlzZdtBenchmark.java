@@ -4,6 +4,7 @@ import org.openjdk.jmh.annotations.*;
 import ru.ifmo.nds.IIndividual;
 import ru.ifmo.nds.INonDominationLevel;
 import ru.ifmo.nds.dcns.concurrent.CJFBYPopulation;
+import ru.ifmo.nds.dcns.concurrent.SyncJFBYPopulation;
 import ru.ifmo.nds.dcns.jfby.JFBYNonDominationLevel;
 import ru.ifmo.nds.dcns.jfby.JFBYPopulation;
 import ru.ifmo.nds.dcns.sorter.IncrementalJFB;
@@ -48,6 +49,7 @@ public abstract class AbstractDtlzZdtBenchmark extends AbstractBenchmark {
         final JFBYPopulation jfbyPopulation = new JFBYPopulation();
         final CopyOnWriteArrayList<AtomicReference<INonDominationLevel>> cjfbyLevels = new CopyOnWriteArrayList<>();
         final CopyOnWriteArrayList<AtomicReference<INonDominationLevel>> cjfbyAltLevels = new CopyOnWriteArrayList<>();
+        final CopyOnWriteArrayList<INonDominationLevel> syncJFBYLevels = new CopyOnWriteArrayList<>();
         additionProblem.getFronts().forEach(f -> {
             final List<IIndividual> individuals = f.stream()
                     .sorted((o1, o2) -> {
@@ -65,10 +67,12 @@ public abstract class AbstractDtlzZdtBenchmark extends AbstractBenchmark {
             jfbyPopulation.getLevels().add(level);
             cjfbyLevels.add(new AtomicReference<>(level));
             cjfbyAltLevels.add(new AtomicReference<>(level));
+            syncJFBYLevels.add(level);
         });
 
         final CJFBYPopulation cjfbyPopulation = new CJFBYPopulation(cjfbyLevels, Integer.MAX_VALUE, false);
         final CJFBYPopulation cjfbyAltPopulation = new CJFBYPopulation(cjfbyAltLevels, Integer.MAX_VALUE, true);
+        final SyncJFBYPopulation syncJFBYPopulation = new SyncJFBYPopulation(incrementalJFB, syncJFBYLevels);
 
         final List<double[]> addends = additionProblem.getAddends();
         final Map<Integer, List<double[]>> concurrentAddends = new HashMap<>();
@@ -79,7 +83,7 @@ public abstract class AbstractDtlzZdtBenchmark extends AbstractBenchmark {
             concurrentAddends.get(threadId).add(addends.get(i));
         }
 
-        preparedTestData.set(new TestData(jfbyPopulation, cjfbyPopulation, cjfbyAltPopulation, addends, concurrentAddends));
+        preparedTestData.set(new TestData(jfbyPopulation, cjfbyPopulation, cjfbyAltPopulation, syncJFBYPopulation, addends, concurrentAddends));
     }
 
     @Benchmark
@@ -95,5 +99,10 @@ public abstract class AbstractDtlzZdtBenchmark extends AbstractBenchmark {
     @Benchmark
     public int cjfbyAlt() {
         return sortUsingCJFBYAlt();
+    }
+
+    @Benchmark
+    public int syncJfby() {
+        return sortUsingSyncJFBY();
     }
 }

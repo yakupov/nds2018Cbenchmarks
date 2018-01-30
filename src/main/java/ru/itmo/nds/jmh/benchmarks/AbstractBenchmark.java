@@ -25,14 +25,18 @@ abstract class AbstractBenchmark {
     }
 
     int sortUsingCJFBY() {
-        return sortUsingCJFBY(getPreparedTestData().getCjfbyPopulation());
+        return sortUsingConcurrentJFBY(getPreparedTestData().getCjfbyPopulation());
     }
 
     int sortUsingCJFBYAlt() {
-        return sortUsingCJFBY(getPreparedTestData().getCjfbyPopulationAlt());
+        return sortUsingConcurrentJFBY(getPreparedTestData().getCjfbyPopulationAlt());
     }
 
-    private int sortUsingCJFBY(final IManagedPopulation population) {
+    int sortUsingSyncJFBY() {
+        return sortUsingConcurrentJFBY(getPreparedTestData().getSyncJFBYPopulation());
+    }
+
+    private int sortUsingConcurrentJFBY(final IManagedPopulation population) {
         final ExecutorService es = Executors.newFixedThreadPool(nThreads());
         try {
             final TestData testData = getPreparedTestData();
