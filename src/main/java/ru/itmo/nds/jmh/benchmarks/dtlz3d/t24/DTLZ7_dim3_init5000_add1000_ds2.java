@@ -1,0 +1,10 @@
+package ru.itmo.nds.jmh.benchmarks.dtlz3d.t24;
+
+import ru.itmo.nds.jmh.benchmarks.AbstractDtlzZdtBenchmark;
+
+/**
+ * Perform all the same tests as in {@link AbstractDtlzZdtBenchmark}
+ * but on another dataset
+ */
+public class DTLZ7_dim3_init5000_add1000_ds2 extends AbstractT24Benchmark {
+}

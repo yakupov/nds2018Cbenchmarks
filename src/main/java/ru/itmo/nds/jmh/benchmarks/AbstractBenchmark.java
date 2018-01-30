@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 abstract class AbstractBenchmark {
     protected abstract TestData getPreparedTestData();
 
-    abstract int nThreads();
+    protected abstract int nThreads();
 
     int sortUsingJFBY() {
         final TestData testData = getPreparedTestData();

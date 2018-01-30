@@ -37,11 +37,6 @@ public abstract class AbstractDtlzZdtBenchmark extends AbstractBenchmark {
         return preparedTestData.get();
     }
 
-    @Override
-    int nThreads() {
-        return 12;
-    }
-
     protected abstract DoublesAdditionProblem loadAdditionProblem() throws Exception;
 
     @SuppressWarnings("WeakerAccess")
