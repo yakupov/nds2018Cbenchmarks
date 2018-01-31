@@ -47,11 +47,16 @@ abstract class AbstractBenchmark {
                 final int threadId = i;
                 es.submit(() -> {
                     int res = 0;
-                    for (double[] doubles : testData.getConcurrentAddends().get(threadId)) {
-                        res += population.addIndividual(new FitnessOnlyIndividual(doubles));
+                    try {
+                        for (double[] doubles : testData.getConcurrentAddends().get(threadId)) {
+                            res += population.addIndividual(new FitnessOnlyIndividual(doubles));
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        latch.countDown();
+                        atomicInteger.set(res);
                     }
-                    latch.countDown();
-                    atomicInteger.set(res);
                 });
             }
             try {
