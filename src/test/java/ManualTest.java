@@ -22,7 +22,7 @@ public class ManualTest {
         for (int i = 0; i < 100; ++i) {
             System.out.println(i);
             benchmark.prepareTestData();
-            System.out.println(benchmark.syncJfby());
+            System.out.println(benchmark.levelLockJfby());
         }
     }
 
@@ -31,7 +31,7 @@ public class ManualTest {
     public void zdt2ds3() throws Exception {
         final ZDT2_dim2_init5000_add1000_ds3 benchmark = new ZDT2_dim2_init5000_add1000_ds3();
         benchmark.prepareTestData();
-        System.out.println(benchmark.syncJfby());
+        System.out.println(benchmark.levelLockJfby());
 
         for (int i = 0; i < 100; ++i) {
             final long ts = System.nanoTime();

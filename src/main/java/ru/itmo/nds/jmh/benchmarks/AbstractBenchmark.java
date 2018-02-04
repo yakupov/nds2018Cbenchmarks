@@ -33,7 +33,11 @@ abstract class AbstractBenchmark {
     }
 
     int sortUsingSyncJFBY() {
-        return sortUsingConcurrentJFBY(getPreparedTestData().getSyncJFBYPopulation());
+        return sortUsingConcurrentJFBY(getPreparedTestData().getLevelLockJFBYPopulation());
+    }
+
+    int sortUsingTsJFBY() {
+        return sortUsingConcurrentJFBY(getPreparedTestData().getTsJfbyPopulation());
     }
 
     private int sortUsingConcurrentJFBY(final IManagedPopulation population) {

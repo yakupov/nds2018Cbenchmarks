@@ -4,9 +4,10 @@ import org.openjdk.jmh.annotations.*;
 import ru.ifmo.nds.IIndividual;
 import ru.ifmo.nds.INonDominationLevel;
 import ru.ifmo.nds.dcns.concurrent.CJFBYPopulation;
-import ru.ifmo.nds.dcns.concurrent.SyncJFBYPopulation;
+import ru.ifmo.nds.dcns.concurrent.LevelLockJFBYPopulation;
 import ru.ifmo.nds.dcns.jfby.JFBYNonDominationLevel;
 import ru.ifmo.nds.dcns.jfby.JFBYPopulation;
+import ru.ifmo.nds.dcns.jfby.TotalSyncJFBYPopulation;
 import ru.ifmo.nds.dcns.sorter.IncrementalJFB;
 import ru.ifmo.nds.impl.FitnessOnlyIndividual;
 import ru.itmo.nds.front_storage.DoublesAdditionProblem;
@@ -46,7 +47,8 @@ public abstract class AbstractDtlzZdtBenchmark extends AbstractBenchmark {
         if (additionProblem == null)
             additionProblem = loadAdditionProblem();
 
-        final JFBYPopulation jfbyPopulation = new JFBYPopulation();
+        final List<INonDominationLevel> jfbyLevels = new ArrayList<>();
+        final List<INonDominationLevel> tsJfbyLevels = new ArrayList<>();
         final CopyOnWriteArrayList<AtomicReference<INonDominationLevel>> cjfbyLevels = new CopyOnWriteArrayList<>();
         final CopyOnWriteArrayList<AtomicReference<INonDominationLevel>> cjfbyAltLevels = new CopyOnWriteArrayList<>();
         final CopyOnWriteArrayList<INonDominationLevel> syncJFBYLevels = new CopyOnWriteArrayList<>();
@@ -64,15 +66,18 @@ public abstract class AbstractDtlzZdtBenchmark extends AbstractBenchmark {
                     .map(FitnessOnlyIndividual::new)
                     .collect(Collectors.toList());
             final JFBYNonDominationLevel level = new JFBYNonDominationLevel(incrementalJFB, individuals);
-            jfbyPopulation.getLevels().add(level);
+            jfbyLevels.add(level);
+            tsJfbyLevels.add(level);
             cjfbyLevels.add(new AtomicReference<>(level));
             cjfbyAltLevels.add(new AtomicReference<>(level));
             syncJFBYLevels.add(level);
         });
 
+        final JFBYPopulation jfbyPopulation = new JFBYPopulation(jfbyLevels, Long.MAX_VALUE);
+        final TotalSyncJFBYPopulation tsJfbyPopulation = new TotalSyncJFBYPopulation(tsJfbyLevels, Long.MAX_VALUE);
         final CJFBYPopulation cjfbyPopulation = new CJFBYPopulation(cjfbyLevels, Integer.MAX_VALUE, false);
         final CJFBYPopulation cjfbyAltPopulation = new CJFBYPopulation(cjfbyAltLevels, Integer.MAX_VALUE, true);
-        final SyncJFBYPopulation syncJFBYPopulation = new SyncJFBYPopulation(incrementalJFB, syncJFBYLevels, Long.MAX_VALUE);
+        final LevelLockJFBYPopulation levelLockJFBYPopulation = new LevelLockJFBYPopulation(incrementalJFB, syncJFBYLevels, Long.MAX_VALUE);
 
         final List<double[]> addends = additionProblem.getAddends();
         final Map<Integer, List<double[]>> concurrentAddends = new HashMap<>();
@@ -83,7 +88,8 @@ public abstract class AbstractDtlzZdtBenchmark extends AbstractBenchmark {
             concurrentAddends.get(threadId).add(addends.get(i));
         }
 
-        preparedTestData.set(new TestData(jfbyPopulation, cjfbyPopulation, cjfbyAltPopulation, syncJFBYPopulation, addends, concurrentAddends));
+        preparedTestData.set(new TestData(jfbyPopulation, tsJfbyPopulation, cjfbyPopulation, cjfbyAltPopulation,
+                levelLockJFBYPopulation, addends, concurrentAddends));
     }
 
     @Benchmark
@@ -102,7 +108,12 @@ public abstract class AbstractDtlzZdtBenchmark extends AbstractBenchmark {
     }
 
     @Benchmark
-    public int syncJfby() {
+    public int levelLockJfby() {
         return sortUsingSyncJFBY();
+    }
+
+    @Benchmark
+    public int tsJfby() {
+        return sortUsingTsJFBY();
     }
 }
