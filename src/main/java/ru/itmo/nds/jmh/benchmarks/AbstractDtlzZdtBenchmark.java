@@ -72,7 +72,7 @@ public abstract class AbstractDtlzZdtBenchmark extends AbstractBenchmark {
 
         final CJFBYPopulation cjfbyPopulation = new CJFBYPopulation(cjfbyLevels, Integer.MAX_VALUE, false);
         final CJFBYPopulation cjfbyAltPopulation = new CJFBYPopulation(cjfbyAltLevels, Integer.MAX_VALUE, true);
-        final SyncJFBYPopulation syncJFBYPopulation = new SyncJFBYPopulation(incrementalJFB, syncJFBYLevels);
+        final SyncJFBYPopulation syncJFBYPopulation = new SyncJFBYPopulation(incrementalJFB, syncJFBYLevels, Long.MAX_VALUE);
 
         final List<double[]> addends = additionProblem.getAddends();
         final Map<Integer, List<double[]>> concurrentAddends = new HashMap<>();
